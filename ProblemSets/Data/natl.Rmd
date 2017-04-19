@@ -1,0 +1,112 @@
+---
+title: "Exploring Pre-Natal Care and Child Health of Teen Births"
+author: "Cheng Yee Lim"
+date: "April 16, 2017"
+header-includes:
+    - \usepackage{setspace}\doublespacing
+output: pdf_document
+bibliography: library.bib
+---
+
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(
+  cache = TRUE, 
+  message = FALSE, 
+  warning = FALSE,
+  echo = FALSE,
+  fig.height=3, 
+  fig.width=5
+  )
+
+library(tidyverse)
+library(knitr)
+
+theme_set(theme_minimal())
+options(digits = 2)
+```
+
+```{r}
+natal <- read.csv("./nataldf.csv") %>% #selected cols from raw 
+  select(-X, -mager9, -mbstate_rec, gestrec10) %>%
+  purrr::set_names(c("age", "race", "education", "prenatalcare", "prenatalvisits", "gestation", "birthweight")) %>% 
+  filter(prenatalcare !=99 & gestation != 99 & birthweight != 9999) #remove observations without reported health data
+```
+
+## Natality Birth Data 
+
+To explore pre-natal care and child health of teen births across ethnic groups, this paper leverages on Natality Data from the National Vital Statistics System, collated by the National Center for Health Statistics. The Natality Data consists of demographic and health microdata, which were extracted from birth certificates filed in vital statistics offices of each District and State of Columbia for the year 2015. For the purpose of our paper, we will be focusing on demographic data on teenager mothers such as age, race, and educational attainment, and health data such as such as birth weight of the child and length of prenatal care. Table 1 contains summary statistics about demographic variables for teen mothers. Of all teen mothers, majority (at least three quantiles) of teen mothers are aged 17 to 19 years. 
+
+```{r teen}
+teen <- natal %>%
+  filter(age < 20) 
+```
+
+```{r demosummarystatistics}
+teen %>% 
+  select(age, race, education) %>%
+  summary() %>% 
+  kable(caption = "Summary Statistics of Demographic Variables of Teen Mothers")
+```
+
+Table 3 and 4 contains summary statistics of health variables for teen births and all births respectively. Teen mothers, on average, begin pre-natal care in the seventh month of their pregnancy and have 6.5 pre-natal care vists. The average gestation period of teen mothers is months and birthweight of a child borne by teen mothers is 3165 grams. On the other hand, in general, mothers begin pre-natal care in the sixth month of pregnancy and visits pre-natal care 6.9 times. The national average birthweight of babies is also 3276 grams. These statistics highlight that teen mothers engage in less pre-natal care and bear less lighter (less healthy) babies than the national average. 
+
+```{r healthsummarystatistics}
+teen %>% 
+  select(prenatalcare, prenatalvisits, gestation, birthweight) %>% 
+  summary() %>%
+  kable(caption = "Summary Statistics of Health Variables of Teen Mothers")
+
+natal %>% 
+  select(prenatalcare, prenatalvisits, gestation, birthweight) %>% 
+  summary() %>%
+  kable(caption = "Summary Statistics of Health Variables of All Mothers")
+```
+
+## Number of Births 
+After removing observations without reported health data, the number of registered births in the United States was `r nrow(natal)` in 2015. Of all registered births, `r nrow(teen)/nrow(natal)*100` (`r nrow(teen)` births) were borne by teen mothers. 72.6% of teen births mothers were of White ethnicity, 23.4% were of Black ethnicity, and the remaining 4% was almost evenly split between natives of America and Asian or Pacific Islanders.
+
+```{r magerhist, fig.cap = "Density Histogram of Mother's Age of All Births in 2015"}
+natal %>% 
+  select(age) %>% 
+  ggplot() +
+  geom_histogram(aes(x = age, ..density..), color = "white", fill = "steelblue2") + 
+  labs(
+    x = "Mother's Age", 
+    y = "Density"
+  )
+```
+```{r}
+teen$race <- factor(teen$race, 
+                       levels = c(1,2,3,4), 
+                       labels = c("White", "Black", "American Indian or Alaskan Native", "Asian or Pacific Islander"))
+teen %>%
+  select(age, race) %>% 
+  group_by(race) %>%
+  summarise(Count = n()) %>% 
+  mutate(Proportion = Count / sum(Count) * 100) %>%
+  kable(caption = "Racial Composition of Teen Mothers")
+```
+
+## Pre-Natal Care and Child Health by Race
+According to existing literature on pre-natal care and child health, there has been disparities in pre-natal care in the United States. Pre-natal care is defined by both the commencement month of pre-natal care for the teen mother and number of pre-natal visits during the course of pregnancy. [@singh1985need, @alexander2002racial, @yu2001prenatal]. Child health, on the other hand, is assessed by the total gestation period and the birthweight of the child. 
+
+\pagebreak
+Table 5 shows that ethnic groups indeed engage in different levels of pre-natal care and have varying child health outcomes at birth. The White ethnic group, on average, engages in longer pre-natal care and more frequent pre-natal visits than other ethnic groups. Black teen moms, on average, begins pre-natal care earlier than american natives and asian teen moms, but teen mothers of the aforementioned three ethnic groups have a similar average of pre-natal care visits. Expectedly, babies of White teenage moms have the longest average gestation period of 7.1 months and weigh approximately 200 grams heavier than babies of Black teenage mothers and Asian teenager mothers. However, a surprising finding is that babies of native American teen mothers are similar to babies of White teen mothers.
+
+
+```{r}
+byrace <- teen %>%
+  na.omit(prenatalcare, prenatalvisits, gestation, birthweight) %>% 
+  group_by(race) %>% 
+  summarize(Month = mean(prenatalcare), 
+            Visits = mean(prenatalvisits), 
+            Gestation = mean(gestation), 
+            Weight = mean(birthweight)) 
+
+byrace %>% 
+  kable(caption = "Racial Comparison of Pre-Natal Care and Birth Health of Child of Teen Mothers")
+
+```
+
+
+## Bibliography 
