@@ -1,0 +1,38 @@
+---
+title: "Computational Review of Performing Authority: Communicating Judicial Decisions in Lower Criminal Courts"
+author: "Cheng Yee Lim"
+date: "May 2, 2017"
+linestretch: 2
+output: pdf_document
+---
+
+This paper investigates how judicial officers exercise their authority to gain legitimacy based on the ways they communicate their decisions in criminal matters in open court. The key research question of the paper is whether sentencing decisions are communicated in different ways depending on the nature of criminal case and the audience they are speaking to. 
+
+The authors hypothesize that:
+\begin{itemize}
+  \item Communicating sentencing decisions will call for judicial behaviors that show some engagement with the defendant and will not rely fully on a detached impersonal model of judicial authority.  
+  \item Conversely, other non-trial decisions in criminal cases (Such as adjournment or bail) will involve more routine communication and less personal engagement than sentencing decisions.  
+  \item These differences reflect different demands on the performance of judicial authorities essential to accomplish or sustain legitimacy.  
+\end{itemize}
+
+This paper employs data from a national court observation study of magistrates and their courts in Australian lower courts. This data set consists of a large number of matters regarding the courtroom and provides information on the decisions of criminal cases across different types of offences. On the whole, 27 different magistrates (six percent of all Australian magistrates) were observed conducting a general criminal list. This resulted in a collection of information from 30 different court sessions in 20 different locations, including all capital cities, five suburban and four regional locations. The observed magistrates also match the overall distribution of age, gender and experience of Australian magistrates. These court observations were conducted and corroborated by two researchers whom were given detailed instructions to maximize consistency between observers and ensure proper coding of magistrate's behavior and other courtroom activities. The two researchers filled up pre-printed templates to record information for each matter related to the defendant, the offence, legal representations, aspects of magistrate's interaction and information for decisions and outcomes, with space for additional comment. 
+
+Drawing from Weber's theories of legitimacy and authority, the paper contextualizes the courtroom as a setting where judicial officer cultivates legitimacy for his/her authority. However, there is a tension between opposing theories that suggest ways to cultivate legitimacy. In the common law adversarial system, the judicial officer is expected to be neutral and act as a fair judge on the claims of the contesting parties. Impersonality and dispassion are emphasized in a conventional understanding of this judicial role to achieve neutrality, and therefore legitimacy and legal authority. 
+
+However, the paper suggests that the courtroom is not only a legal setting, but also a social setting. Others argue that "cold" depersonalization of the defendant deters the judicial officer from cultivating the belief in legitimacy when exercising his/her authority. The failure to cultivate legitimacy can then be overcome by better management of information and emotions in face-to-face interactions between judicial officers and the defendant, as explained by Goffman have examined face-to-face effects with organizational imperatives. 
+
+Ultimately, the paper draws on the concept of procedural justice to mediate the tensions between face-to-face encounters and conventional detached adjudication. Procedural justice stresses the importance of not treating defendants as a legal or bureaucratic category. People with authority ought to respect others, acknowledging their concerns and recognize them as individuals.
+
+The assigned paper is a descriptive study. The paper carry out their analysis on data from a national court observation study of criminal cases in Australian lower courts to illustrate the different ways magistrates choose to communicate their decisions within the framework of the socio-legal content of the courtroom. The authors focus on these important dimensions of communication such as whether the magistrate makes eye contact or speak directly to the defendant, and the structure he chose to deliver the sentence i.e. ordering of the sentence decision and reasons for the decision, and how these encounters are affected by the presence of a legal representative. By highlighting the manner of communication, the authors considers the implications of their actions for performing authority and maintaining legitimacy.  
+
+The paper calculated descriptive statistics of the proportion of sentencing decisions cases where the magistrate performed a certain action that they deemed as personal communication and compared them with the proportion of all other cases where the magistrate also performed the same action. Such comparison allows assessment of the socio-legal significance of sentencing decision and investigation of the particular demands for accomplishing judicial authorities when delivering those decisions. The paper found that:
+\begin{itemize}
+  \item when communicating their decisions, magistrates usually rely on a more impersonal performance of the judicial role 
+  \item when delivering sentencing decisions, magistrates show a greater degree of engagement with the defendant as compared to when delivering other decisions. 
+  \item Therefore, these findings show that to perform legal authority in court, it requires both a level of engagement, especially with the defendant, and the more formal elements of impersonality, rationality and logic.  
+\end{itemize}
+
+\underline{Areas of Improvement}  
+1) The authors could have validated their study by showing how a greater degree of engagement really results in a greater maintenance of legitimacy in the Australian lower courts. I.e. the observers would have also recorded down the reactions of the defendants after the magistrate announced the sentencing decision. They could show some descriptive statistics of the different reactions of defendants to different ways of communicating the sentencing decision and all other decisions.  
+2) The authors could also show how the communication conducted by the magistrate changes with the severity of the verdict. This will further strengthen the argument of a socio-legal significance of sentencing decisions.  
+
