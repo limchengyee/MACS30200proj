@@ -1,0 +1,263 @@
+---
+title: "PS3"
+author: "ChengYee Lim"
+date: "05/14/2017"
+output:
+  github_document
+---
+
+
+```{r}
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE,
+                      echo = FALSE)
+```
+```{r}
+library(tidyverse)
+library(forcats)
+library(broom)
+library(modelr)
+library(stringr)
+library(ISLR)
+library(lmtest)
+library(forcats)
+library(car)
+library(Amelia)
+
+options(digits = 3)
+set.seed(1234)
+theme_set(theme_minimal())
+```
+
+
+# Regression Diagnostics 
+## Non-normality of Errors 
+```{r}
+joe <- read.csv("biden.csv") %>%
+  na.omit(female, age, educ) %>%
+  mutate(female = factor(female, levels = c(0,1), labels = c("Male", "Female"))) %>%
+  mutate(dem = factor(dem, levels = c(0,1), labels = c("Non-Democrat", "Democrat"))) %>%
+  mutate(rep = factor(rep, levels = c(0,1), labels = c("Non-Republican", "Republican"))) 
+
+
+joe_1 <- lm(biden ~ age + female + educ, data = joe)
+tidy(joe_1)
+
+car::qqPlot(joe_1)
+
+augment(joe_1, joe) %>%
+  mutate(.student = rstudent(joe_1)) %>%
+  ggplot(aes(.student)) +
+  geom_density(adjust = .5) +
+  labs(x = "Studentized residuals",
+       y = "Estimated density")
+```
+
+## Heteroskedasticity 
+
+```{r}
+joe %>%
+  add_predictions(joe_1) %>%
+  add_residuals(joe_1) %>%
+  ggplot(aes(pred, resid)) +
+  geom_point(alpha = .2) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_quantile(method = "rqss", lambda = 5, quantiles = c(.05, .95)) +
+  labs(title = "Homoscedastic variance of error terms",
+       x = "Predicted values",
+       y = "Residuals")
+
+bptest(joe_1)
+```
+The results of the Breusch-Pagan test shows that we reject the null hypothesis of homoskedastic standard errors at 1% significance level. We could attempt to correct for heteroscedasticity only in the standard error estimates with Huber-White standard errors. This produces the same estimated parameters, but adjusts the standard errors to account for the violation of the constant error variance assumption.
+
+## Multicollinearity 
+```{r}
+cormat_heatmap <- function(data){
+  # generate correlation matrix
+  cormat <- round(cor(data), 2)
+  
+  # melt into a tidy table
+  get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+  
+  upper_tri <- get_upper_tri(cormat)
+  
+  # reorder matrix based on coefficient value
+  reorder_cormat <- function(cormat){
+    # Use correlation between variables as distance
+    dd <- as.dist((1-cormat)/2)
+    hc <- hclust(dd)
+    cormat <-cormat[hc$order, hc$order]
+  }
+  
+  cormat <- reorder_cormat(cormat)
+  upper_tri <- get_upper_tri(cormat)
+  
+  # Melt the correlation matrix
+  melted_cormat <- reshape2::melt(upper_tri, na.rm = TRUE)
+  
+  # Create a ggheatmap
+  ggheatmap <- ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+    geom_tile(color = "white")+
+    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                         midpoint = 0, limit = c(-1,1), space = "Lab", 
+                         name="Pearson\nCorrelation") +
+    theme_minimal()+ # minimal theme
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                     size = 12, hjust = 1))+
+    coord_fixed()
+  
+  # add correlation values to graph
+  ggheatmap + 
+    geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) +
+    theme(
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      axis.ticks = element_blank(),
+      legend.position = "bottom")
+}
+
+cormat_heatmap(select_if(joe, is.numeric))
+
+library(GGally)
+ggpairs(select_if(joe, is.numeric))
+```
+From the plots and heatmaps, we can see that multicollinearity is not an issue. The correlations between variables are very low. 
+
+##Interactive Term 
+```{r}
+joe_2 <- lm(biden ~ age * educ, data = joe)
+tidy(joe_2)
+```
+
+###Marginal Effect of Age on Joe Biden Thermometer Rating, Conditional on Education
+
+We calculate the marginal effect of age on biden conditional on educ with:
+
+$$\frac{\delta E(biden)}{\delta age} = \beta_{1} + \beta_{3}educ$$ 
+Substituting the estimated coefficients from the model, we have the following equation to calculate the marginal effect of age: 
+
+$$\frac{\delta E(biden)}{\delta age} = 0.672 + -0.048educ$$ 
+
+Thus, the marginal effect of age on biden conditional on education has variable magnitude. For values of $educ < 14$ the effect on biden is positive, but for $educ \geq 14$ the effect is negative.
+
+```{r}
+linearHypothesis(joe_2, "age + age:educ")
+```
+
+The hypothesis test also tells us that the marginal effect is highly significant. 
+
+### Marginal Effect of Education on Joe Biden thermometer rating, conditional on age 
+We calculate the marginal effect of education on biden conditional on age with:
+
+$$\frac{\delta E(biden)}{\delta educ} = \beta_{2} + \beta_{2}age$$ 
+Substituting the estimated coefficients from the model, we have the following equation to calculate the marginal effect of education: 
+
+$$\frac{\delta E(biden)}{\delta educ} = 1.657  -0.0480educ$$
+
+Thus, the marginal effect of education on biden conditional on age has variable magnitude. For values of $age < 35$ the effect on biden is positive, but for $age \geq 35$ the effect is negative.
+
+```{r}
+linearHypothesis(joe_2, "educ + age:educ")
+```
+
+The hypothesis test shows that the marginal effect of education is highly significant. 
+
+## Missing Data 
+
+```{r}
+joe_missing <- read.csv("biden.csv")
+
+joe_select <- joe_missing %>% 
+  select(biden, age, educ, female) %>%
+  mutate(female = as.numeric(female))
+
+joe_select %>%
+  summarize_all(funs(sum(is.na(.))))
+
+
+GGally::ggpairs(joe_select)
+
+joe.out <- amelia(joe_select, m = 5,
+                      log = c("biden", "female", "age", "educ"))
+```
+
+
+Several of these variables are clearly not normally distributed; transforming these variables will also help make the dataset more multivariate normal, so we can transform them before imputation. 
+
+```{r}
+models_imp <- data_frame(data = joe.out$imputations) %>%
+  mutate(model = map(data, ~ lm(biden ~ age + educ + female,
+                                data = .x)),
+         coef = map(model, tidy)) %>%
+  unnest(coef, .id = "id")
+
+models_trans_imp <- data_frame(data = joe.out$imputations) %>%
+  mutate(model = map(data, ~ lm(biden ~ age + educ + female,
+                                data = .x)),
+         coef = map(model, tidy)) %>%
+  unnest(coef, .id = "id")
+
+mi.meld.plus <- function(df_tidy){
+  # transform data into appropriate matrix shape
+  coef.out <- df_tidy %>%
+    select(id:estimate) %>%
+    spread(term, estimate) %>%
+    select(-id)
+  
+  se.out <- df_tidy %>%
+    select(id, term, std.error) %>%
+    spread(term, std.error) %>%
+    select(-id)
+  
+  combined.results <- mi.meld(q = coef.out, se = se.out)
+  
+  data_frame(term = colnames(combined.results$q.mi),
+             estimate.mi = combined.results$q.mi[1, ],
+             std.error.mi = combined.results$se.mi[1, ])
+}
+
+# compare results
+tidy(joe_1) %>%
+  left_join(mi.meld.plus(models_trans_imp)) %>%
+  select(-statistic, -p.value)
+
+bind_rows(orig = tidy(joe_1),
+          full_imp = mi.meld.plus(models_imp) %>%
+            rename(estimate = estimate.mi,
+                   std.error = std.error.mi),
+          trans_imp = mi.meld.plus(models_trans_imp) %>%
+            rename(estimate = estimate.mi,
+                   std.error = std.error.mi),
+          .id = "method") %>%
+  mutate(method = factor(method, levels = c("orig", "full_imp", "trans_imp"),
+                         labels = c("Listwise deletion", "Full imputation",
+                                    "Transformed imputation")),
+         term = factor(term, levels = c("(Intercept)", "contraception",
+                                        "educationFemale", "log(GDPperCapita)"),
+                       labels = c("Intercept", "Contraception", "Female education",
+                                  "GDP per capita (log)"))) %>%
+  filter(term != "Intercept") %>%
+  ggplot(aes(fct_rev(term), estimate, color = fct_rev(method),
+             ymin = estimate - 1.96 * std.error,
+             ymax = estimate + 1.96 * std.error)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_pointrange(position = position_dodge(.75)) +
+  coord_flip() +
+  scale_color_discrete(guide = guide_legend(reverse = TRUE)) +
+  labs(title = "Comparing regression results",
+       subtitle = "Omitting intercept from plot",
+       x = NULL,
+       y = "Estimated parameter",
+       color = NULL) +
+  theme(legend.position = "bottom")
+
+
+```
+
